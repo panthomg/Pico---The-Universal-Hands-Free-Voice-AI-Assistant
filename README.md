@@ -1,3 +1,4 @@
+<img width="11585" height="5375" alt="Untitled Document 2" src="https://github.com/user-attachments/assets/a34b2cce-6f3c-4e3b-97ca-45fe082d3a3d" />
 # PICO — The Universal, Hands-Free Voice AI Assistant
 
 > **"For those who ask. For those who question."**
