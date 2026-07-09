@@ -157,12 +157,26 @@ Pico: Immediate stream termination → Resets to listen for subsequent command
 | 🧠 **Think & Search** | *"Pico, search and think..."* | Broad web fetch followed by deep contextual synthesis | *"How will AI change education?"* |
 
 
-# PicoBox - Hands-Free Voice AI Assistant
-# Copyright (c) 2026 Panth Mavani. All Rights Reserved.
-# 
-# This software is proprietary and confidential. Unauthorized copying,
-# distribution, modification, or use of this software without explicit
-# written permission from the copyright holder is strictly prohibited.
+---
+
+## 📄 License & Copyright
+
+**© 2026 Panth Mavani, Gujarat, India. All Rights Reserved.**
+
+PicoBox is a proprietary project. No part of this software or its associated documentation may be copied, modified, distributed, or used without explicit written permission from the author.
+
+* **Licensing Inquiries:** omgpanth6623@gmail.com
+* *Made with ❤️ for those who ask. For those who question.* 🎙️✨
+
+---
+
+## 🔗 Quick Links
+
+* [GitHub Repository](https://github.com/panthomg/PicoBox/)
+* [Showcase Guide](https://github.com/panthomg/PicoBox/blob/main/use_guide.md)
+* [Competition Submission](https://www.google.com/search?q=%23)
+
+---
 # 
 # For licensing inquiries, please contact: omgpanth6623@gmail.com
 
