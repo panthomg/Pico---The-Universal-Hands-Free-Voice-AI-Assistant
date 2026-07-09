@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PICO - The Privacy-First Voice AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        body { 
+            background-color: #e6e4e0; 
+            color: #111111; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        }
+        
+        /* Tactical/Brutalist Technical patterns */
+        .checkerbar {
+            height: 12px;
+            background-image: 
+                linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111), 
+                linear-gradient(45deg, #111 25%, #e6e4e0 25%, #e6e4e0 75%, #111 75%, #111);
+            background-size: 12px 12px;
+            background-position: 0 0, 6px 6px;
+            border-bottom: 2px solid #111;
+        }
+
+        .brutalist-panel { 
+            background: #f0ede9; 
+            border: 2px solid #111; 
+            box-shadow: 4px 4px 0px 0px #111;
+        }
+        
+        .brutalist-button {
+            background: #111;
+            color: #e6e4e0;
+            border: 2px solid #111;
+            transition: all 0.15s ease-in-out;
+        }
+        .brutalist-button:hover {
+            background: #e6e4e0;
+            color: #111;
+            box-shadow: 4px 4px 0px 0px #111;
+            transform: translate(-2px, -2px);
+        }
+        .brutalist-button:active {
+            transform: translate(0px, 0px);
+            box-shadow: 0px 0px 0px 0px #111;
+        }
+
+        #canvas-container { 
+            width: 100%; 
+            height: 400px; 
+            cursor: grab; 
+            background-color: #f0ede9;
+        }
+        #canvas-container:active { cursor: grabbing; }
+
+        pre { 
+            background: #111; 
+            padding: 1rem; 
+            border-radius: 0px; 
+            overflow-x: auto; 
+            border: 2px solid #111; 
+        }
+        code { color: #f97316; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            border-left: 2px solid #111;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e6e4e0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #111;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-orange-500 selection:text-white">
+
+    <!-- Top Decorative Checkerboard Header -->
+    <div class="checkerbar w-full"></div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 w-full z-50 bg-[#e6e4e0]/90 backdrop-blur-md border-b-2 border-black">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-black text-2xl tracking-tighter uppercase flex items-center gap-2">
+                PICO<span class="text-orange-600">®</span>
+                <span class="text-xs font-mono font-normal tracking-normal border border-black px-1.5 py-0.5 bg-black text-[#e6e4e0]">V1.0</span>
+            </div>
+            
+            <!-- Desktop navigation links -->
+            <div class="hidden md:flex space-x-8 text-xs font-mono font-bold uppercase tracking-wider">
+                <a href="#3d-model" class="hover:underline hover:text-orange-600 transition">01 / Model</a>
+                <a href="#dashboard-gui" class="hover:underline hover:text-orange-600 transition">02 / GUI App</a>
+                <a href="#hardware" class="hover:underline hover:text-orange-600 transition">03 / Hardware</a>
+                <a href="#software" class="hover:underline hover:text-orange-600 transition">04 / Software</a>
+                <a href="#features" class="hover:underline hover:text-orange-600 transition">05 / Features</a>
+            </div>
+            
+            <div class="hidden md:block">
+                <a href="https://github.com/panthomg/PicoBox" target="_blank" class="brutalist-button px-5 py-2 font-mono text-xs uppercase tracking-widest font-bold">
+                    GitHub Repository
+                </a>
+            </div>
+
+            <!-- Hamburger menu button specifically for phone/mobile users -->
+            <button onclick="toggleMobileMenu()" class="md:hidden border-2 border-black bg-black text-[#e6e4e0] p-2 hover:bg-[#e6e4e0] hover:text-black transition">
+                <svg id="menu-icon-hamburger" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+                <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Separate Mobile Drawer Overlay -->
+        <div id="mobile-drawer" class="hidden md:hidden fixed top-[68px] left-0 w-full h-[calc(100vh-68px)] bg-[#e6e4e0] z-40 border-t-2 border-black p-6 flex flex-col justify-between">
+            <div class="space-y-6 flex flex-col pt-4">
+                <a href="#3d-model" onclick="toggleMobileMenu()" class="text-3xl font-black uppercase tracking-tight hover:text-orange-600 border-b border-black pb-2">01 / Model</a>
+                <a href="#dashboard-gui" onclick="toggleMobileMenu()" class="text-3xl font-black uppercase tracking-tight hover:text-orange-600 border-b border-black pb-2">02 / GUI Dashboard</a>
+                <a href="#hardware" onclick="toggleMobileMenu()" class="text-3xl font-black uppercase tracking-tight hover:text-orange-600 border-b border-black pb-2">03 / Hardware</a>
+                <a href="#software" onclick="toggleMobileMenu()" class="text-3xl font-black uppercase tracking-tight hover:text-orange-600 border-b border-black pb-2">04 / Software</a>
+                <a href="#features" onclick="toggleMobileMenu()" class="text-3xl font-black uppercase tracking-tight hover:text-orange-600 border-b border-black pb-2">05 / Features</a>
+            </div>
+            <div class="space-y-4">
+                <a href="https://github.com/panthomg/PicoBox" target="_blank" class="block text-center brutalist-button py-4 font-mono text-sm uppercase tracking-widest font-bold">
+                    GitHub Repository
+                </a>
+                <div class="text-center text-[10px] font-mono text-slate-500 uppercase tracking-widest">
+                    PICOBOX — DEVICE INTERFACE V1.0
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="pt-24 pb-12 px-6 max-w-7xl mx-auto relative">
+        <div class="grid md:grid-cols-12 gap-8 mb-12">
+            <!-- Information Block -->
+            <div class="md:col-span-12 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center gap-4 text-xs font-mono uppercase tracking-widest text-slate-600 mb-6">
+                        <span>TYPE: DUAL-PROCESSOR SMART SPEAKER</span>
+                        <span>•</span>
+                        <span>SERIES: PICOBOX V1.0</span>
+                    </div>
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter uppercase leading-none mb-6">
+                        The future <br>of work <span class="text-orange-600">®</span>
+                    </h1>
+                </div>
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mt-4">
+                    <p class="text-xl md:text-2xl text-slate-700 max-w-2xl font-normal leading-snug">
+                        "For those who ask. For those who question." Introducing Pico, a smart LLM-based assistant speaker built for you and your home space, utilizing open software architecture.
+                    </p>
+                    <div class="flex gap-4 shrink-0 font-mono text-xs">
+                        <span class="border border-black bg-black text-[#e6e4e0] px-3 py-1.5 uppercase font-bold tracking-wider">True Hands-Free</span>
+                        <span class="border-2 border-black px-3 py-1 uppercase font-bold tracking-wider">Open Architecture</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="relative group mt-12">
+            <div class="absolute -inset-1 bg-black rounded-none opacity-10 group-hover:opacity-15 transition"></div>
+            <img src="https://github.com/user-attachments/assets/fc2be432-f714-4b43-b5ba-200988178e2c" alt="Pico Banner" class="relative w-full rounded-none border-2 border-black mb-8 shadow-[6px_6px_0px_0px_#111]">
+        </div>
+    </header>
+
+    <!-- Interactive 3D Model Section -->
+    <section id="3d-model" class="py-16 bg-[#f0ede9] border-y-2 border-black relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 pb-4 border-b-2 border-black">
+                <div class="mb-4 md:mb-0">
+                    <span class="text-xs font-mono uppercase tracking-widest text-orange-600 font-bold">[ Model Manifest ]</span>
+                    <h2 class="text-3xl font-black uppercase mt-1">Meet Pico in 3D</h2>
+                </div>
+                <p class="text-xs font-mono uppercase tracking-wider text-slate-600">Drag to rotate. Scroll to zoom. Realized enclosure modeling.</p>
+            </div>
+            
+            <div class="relative">
+                <!-- Outer Corner crosshair accents for technical style -->
+                <div class="absolute -top-3 -left-3 text-xl font-mono text-black select-none pointer-events-none">+</div>
+                <div class="absolute -top-3 -right-3 text-xl font-mono text-black select-none pointer-events-none">+</div>
+                <div class="absolute -bottom-3 -left-3 text-xl font-mono text-black select-none pointer-events-none">+</div>
+                <div class="absolute -bottom-3 -right-3 text-xl font-mono text-black select-none pointer-events-none">+</div>
+                
+                <div id="canvas-container" class="border-2 border-black shadow-[4px_4px_0px_0px_#111]"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- COMPANION WEB DASHBOARD SIMULATOR SECTION (GUI UI/UX) -->
+    <section id="dashboard-gui" class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="mb-16 border-b-2 border-black pb-8">
+            <div class="flex items-center gap-3 text-xs font-mono uppercase text-orange-600 font-bold mb-2">
+                <span>SECTION_02</span>
+                <span>/</span>
+                <span>COMPANION WEB APPLICATION</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black uppercase">Pico Dashboard Simulator</h2>
+            <p class="text-slate-600 mt-2 font-mono text-sm uppercase">Experience the actual companion control application's parameter tuning right here.</p>
+        </div>
+
+        <div class="grid lg:grid-cols-12 gap-8">
+            <!-- Left Side controls panel -->
+            <div class="lg:col-span-5 brutalist-panel p-6 bg-[#f0ede9] flex flex-col justify-between">
+                <div>
+                    <h3 class="font-mono font-bold text-sm uppercase border-b border-black pb-3 mb-6 flex justify-between">
+                        <span>🎛️ Control Panel</span>
+                        <span class="text-orange-600">ONLINE</span>
+                    </h3>
+
+                    <!-- Controller 1: Model selector -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-mono font-bold uppercase mb-2">Select Active Backend Model</label>
+                        <select id="sim-model" onchange="updateSimulatedModel()" class="w-full font-mono text-xs border-2 border-black bg-white p-3 focus:outline-none focus:ring-0">
+                            <option value="deepseek">DeepSeek V4-Flash (Dynamic API)</option>
+                            <option value="openai">OpenAI GPT-4o Mini (Cloud Standard)</option>
+                            <option value="sonnet">Anthropic Claude 3.5 Sonnet (Logic Core)</option>
+                            <option value="ollama">Ollama Llama 3.2 (100% Offline/Secure)</option>
+                        </select>
+                    </div>
+
+                    <!-- Controller 2: Mode selector -->
+                    <div class="mb-6">
+                        <label class="block text-xs font-mono font-bold uppercase mb-2">Configure Routing Mode</label>
+                        <div class="grid grid-cols-3 gap-2 font-mono text-[10px]">
+                            <button id="mode-think" onclick="setSimMode('think')" class="border-2 border-black bg-black text-white p-2 text-center uppercase font-bold transition">Think Mode</button>
+                            <button id="mode-search" onclick="setSimMode('search')" class="border-2 border-black bg-white text-black p-2 text-center uppercase font-bold transition">Search Mode</button>
+                            <button id="mode-both" onclick="setSimMode('both')" class="border-2 border-black bg-white text-black p-2 text-center uppercase font-bold transition">Both</button>
+                        </div>
+                    </div>
+
+                    <!-- Controller 3: Remote Mic Toggle -->
+                    <div class="mb-8 p-4 border border-dashed border-black/40 bg-white/50 font-mono text-xs">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="font-bold uppercase block">Smartphone Remote Mic</span>
+                                <span class="text-[10px] text-slate-500">Audio Remote Mode</span>
+                            </div>
+                            <button id="remote-toggle" onclick="toggleRemoteMic()" class="border-2 border-black bg-white px-3 py-1 font-bold text-[10px] uppercase">Toggle On</button>
+                        </div>
+                        <div class="text-[10px] text-slate-500 mt-2">
+                            Status: <span id="remote-status" class="text-red-700 font-bold">DISCONNECTED</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <!-- Trigger Interaction Button -->
+                    <button onclick="triggerSimulatedSequence()" class="w-full text-center brutalist-button py-4 font-mono font-bold uppercase tracking-widest text-sm flex justify-center items-center gap-2">
+                        <span>🎙️ Trigger "Hey Pico" Call</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Side live output panel -->
+            <div class="lg:col-span-7 border-2 border-black bg-[#111111] text-[#e6e4e0] p-6 flex flex-col justify-between shadow-[4px_4px_0px_0px_#111] font-mono">
+                <div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-center border-b border-white/20 pb-4 mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" id="sim-status-dot"></span>
+                            <span class="text-xs uppercase font-bold" id="sim-status-text">Ready to trigger</span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">
+                            TARGET_HOST: 192.168.1.104
+                        </div>
+                    </div>
+
+                    <!-- Visual logs terminal terminal -->
+                    <div class="space-y-4 text-xs h-64 overflow-y-auto mb-6 pr-2" id="sim-terminal-screen">
+                        <p class="text-slate-500">// PicoBox Terminal Interface initialized.</p>
+                        <p class="text-slate-500">// Waiting for input signal...</p>
+                    </div>
+                </div>
+
+                <!-- Live System Metrics from repo specifications -->
+                <div class="border-t border-white/20 pt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-[10px] uppercase tracking-wider text-slate-400">
+                    <div>
+                        <span class="block text-slate-500">CPU Temperature</span>
+                        <strong class="text-white text-xs" id="metric-temp">48.5 °C</strong>
+                    </div>
+                    <div>
+                        <span class="block text-slate-500">Memory Load</span>
+                        <strong class="text-white text-xs" id="metric-ram">72.4%</strong>
+                    </div>
+                    <div>
+                        <span class="block text-slate-500">Acoustic Audio AEC</span>
+                        <strong class="text-emerald-400 text-xs font-bold">Active</strong>
+                    </div>
+                    <div>
+                        <span class="block text-slate-500">Local Token Cap</span>
+                        <strong class="text-orange-400 text-xs">50K / Day</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Hardware Section -->
+    <section id="hardware" class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="mb-16 border-b-2 border-black pb-8">
+            <div class="flex items-center gap-3 text-xs font-mono uppercase text-orange-600 font-bold mb-2">
+                <span>SECTION_03</span>
+                <span>/</span>
+                <span>PHYSICAL SPECIFICATIONS</span>
+            </div>
+            <h2 class="text-4xl md:text-5xl font-black uppercase">Everything about the Hardware</h2>
+            <p class="text-slate-600 mt-2 font-mono text-sm uppercase">PicoBox housing design optimization for Arduino Uno Q architectures.</p>
+        </div>
+
+        <img src="https://github.com/user-attachments/assets/bbe95f63-0310-4345-9dbe-734af74f7c62" alt="Hardware Banner" class="w-full rounded-none border-2 border-black shadow-[4px_4px_0px_0px_#111] mb-12">
+
+        <div class="grid md:grid-cols-3 gap-8 mb-16">
+            <!-- Brain -->
+            <div class="brutalist-panel p-8">
+                <div class="flex justify-between items-start border-b border-black pb-4 mb-4">
+                    <span class="text-xs font-mono font-bold text-orange-600">[ Core Logic ]</span>
+                    <span class="text-xs font-mono text-slate-500">A_UNO_Q</span>
+                </div>
+                <h3 class="text-2xl font-black uppercase mb-1">The Brain</h3>
+                <p class="text-slate-700 font-mono text-xs uppercase mb-4">Arduino UNO Q 4GB</p>
+                <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                    A hybrid architecture segmenting physical/audio signals to prevent playback jitter while processing intensive local offline inference blocks.
+                </p>
+                <ul class="text-xs font-mono space-y-3 text-slate-800 border-t border-black/20 pt-4">
+                    <li><strong class="text-black">CPU:</strong> Qualcomm QRB2210 (quad-core 2.0GHz)</li>
+                    <li><strong class="text-black">RAM:</strong> 4GB LPDDR4</li>
+                    <li><strong class="text-black">Storage:</strong> 32GB eMMC</li>
+                    <li><strong class="text-black">OS:</strong> Debian Linux (dual-architecture)</li>
+                </ul>
+            </div>
+
+            <!-- Ears -->
+            <div class="brutalist-panel p-8">
+                <div class="flex justify-between items-start border-b border-black pb-4 mb-4">
+                    <span class="text-xs font-mono font-bold text-orange-600">[ Input Sense ]</span>
+                    <span class="text-xs font-mono text-slate-500">RESP_XVF</span>
+                </div>
+                <h3 class="text-2xl font-black uppercase mb-1">The Ears</h3>
+                <p class="text-slate-700 font-mono text-xs uppercase mb-4">ReSpeaker XVF3800</p>
+                <p class="text-sm text-slate-600 mb-6 leading-relaxed">XMOS hardware layer far-field tracking allows clear, cross-room vocal commands under complex acoustic echo environments.</p>
+                <ul class="text-xs font-mono space-y-3 text-slate-800 border-t border-black/20 pt-4">
+                    <li><strong class="text-black">Mics:</strong> 4 MEMS digital microphones</li>
+                    <li><strong class="text-black">Range:</strong> Up to 5 meters (far-field)</li>
+                    <li><strong class="text-black">Coverage:</strong> 360° voice tracking</li>
+                    <li><strong class="text-black">Features:</strong> Beamforming, AEC, Noise Supression</li>
+                </ul>
+            </div>
+
+            <!-- Mouth -->
+            <div class="brutalist-panel p-8">
+                <div class="flex justify-between items-start border-b border-black pb-4 mb-4">
+                    <span class="text-xs font-mono font-bold text-orange-600">[ Output Engine ]</span>
+                    <span class="text-xs font-mono text-slate-500">USB_SPK_2.0</span>
+                </div>
+                <h3 class="text-2xl font-black uppercase mb-1">The Mouth</h3>
+                <p class="text-slate-700 font-mono text-xs uppercase mb-4">USB 2.0 Speaker</p>
+                <p class="text-sm text-slate-600 mb-6 leading-relaxed">Delivers clean, natural synthesized speech. Perfect acoustics matching the inner space layout of PicoBox chassis.</p>
+                <ul class="text-xs font-mono space-y-3 text-slate-800 border-t border-black/20 pt-4">
+                    <li><strong class="text-black">Output:</strong> 2 x 3W drivers</li>
+                    <li><strong class="text-black">Interface:</strong> USB + 3.5mm AUX</li>
+                    <li><strong class="text-black">Alternative:</strong> JBL GO 3 (Prototyping)</li>
+                    <li><strong class="text-black">Mount:</strong> Custom modular internal plate</li>
+                </ul>
+            </div>
+        </div>
+
+        <img src="https://github.com/user-attachments/assets/placeholder-hardware-diagram" alt="Hardware Block Diagram" style="display:none;" />
+        <img src="https://github.com/user-attachments/assets/placeholder-image-3" alt="Hardware Image" class="w-full rounded-none border-2 border-black my-8" />
+
+        <div class="grid md:grid-cols-2 gap-8 mt-12">
+            <div class="brutalist-panel p-8">
+                <h3 class="text-xl font-bold uppercase mb-4 tracking-tight border-b border-black pb-2">Physical Design Specifications</h3>
+                <table class="w-full text-sm text-left font-mono">
+                    <tbody>
+                        <tr class="border-b border-black/20"><td class="py-3 font-semibold text-black">Form Factor</td><td class="py-3 text-slate-600 text-right">Cube (Steam Machine style)</td></tr>
+                        <tr class="border-b border-black/20"><td class="py-3 font-semibold text-black">Dimensions</td><td class="py-3 text-slate-600 text-right">~152mm (6 inches) per side</td></tr>
+                        <tr class="border-b border-black/20"><td class="py-3 font-semibold text-black">Material</td><td class="py-3 text-slate-600 text-right">3D-printed PLA / PETG Enclosure</td></tr>
+                        <tr><td class="py-3 font-semibold text-black">Weight</td><td class="py-3 text-slate-600 text-right">~500g (unassembled weight)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="brutalist-panel p-8">
+                <h3 class="text-xl font-bold uppercase mb-4 tracking-tight border-b border-black pb-2">Complete Bill of Materials</h3>
+                <table class="w-full text-sm text-left font-mono">
+                    <thead>
+                        <tr class="border-b border-black"><th class="py-2 text-black">Component</th><th class="py-2 text-right text-black">Model</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr class="border-b border-black/20"><td class="py-2.5 text-slate-600">Main Board</td><td class="py-2.5 text-slate-600 text-right font-bold">Arduino UNO Q 4GB</td></tr>
+                        <tr class="border-b border-black/20"><td class="py-2.5 text-slate-600">Mic Array</td><td class="py-2.5 text-slate-600 text-right font-bold">ReSpeaker XVF3800 Flex</td></tr>
+                        <tr class="border-b border-black/20"><td class="py-2.5 text-slate-600">Speaker</td><td class="py-2.5 text-slate-600 text-right font-bold">USB 2.0 Speaker</td></tr>
+                        <tr class="border-b border-black/20"><td class="py-2.5 text-slate-600">Power</td><td class="py-2.5 text-slate-600 text-right font-bold">5V/3A USB-C Adapter</td></tr>
+                        <tr><td class="py-2.5 text-slate-600">Hub</td><td class="py-2.5 text-slate-600 text-right font-bold">4-in-1 USB-C Hub</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- Software Section -->
+    <section id="software" class="py-24 bg-[#f0ede9] border-y-2 border-black">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="mb-12">
+                <span class="text-xs font-mono uppercase tracking-widest text-orange-600 font-bold">[ Operational Stack ]</span>
+                <h2 class="text-4xl md:text-5xl font-black uppercase mt-2">All The Software Specifications</h2>
+            </div>
+            
+            <img src="https://github.com/user-attachments/assets/4dca9b9f-4092-44d4-b167-6453fcab0359" alt="Software Architecture UI" class="w-full rounded-none border-2 border-black mb-8 shadow-[4px_4px_0px_0px_#111]">
+            
+            <p class="text-lg text-slate-700 font-mono font-bold mb-12 border-l-4 border-orange-600 pl-4 uppercase">
+                "To enhance the software quality and time spent on development, AI would be used appropriately and responsibly in developing the software end."
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <!-- Stack -->
+                <div>
+                    <h3 class="text-xl font-black uppercase mb-6 flex items-center"><span class="bg-black text-[#e6e4e0] text-xs font-mono px-2 py-1 mr-3">04.1</span> Complete Software Stack</h3>
+                    <div class="border-2 border-black bg-white rounded-none p-6 text-xs font-mono text-slate-800 leading-relaxed shadow-[4px_4px_0px_0px_#111]">
+                        <div class="text-orange-600 font-bold mb-2 uppercase tracking-wider border-b border-black pb-1">■ APPLICATION LAYER</div>
+                        • FastAPI + Uvicorn (Web Framework & WebSocket server)<br><br>
+                        
+                        <div class="text-orange-600 font-bold mb-2 uppercase tracking-wider border-b border-black pb-1">■ CORE SERVICES</div>
+                        • Wake Word (Porcupine)<br>
+                        • Speaker Verification (Picovoice Eagle biometric engine)<br>
+                        • Speech-to-Text (Vosk high-accuracy local engine)<br>
+                        • Text-to-Speech (Piper local synthesizer)<br>
+                        • VAD (Silero) & Command Router<br><br>
+                        
+                        <div class="text-orange-600 font-bold mb-2 uppercase tracking-wider border-b border-black pb-1">■ AI INTEGRATION</div>
+                        • DeepSeek V4 API (Flash/Pro)<br>
+                        • Web Search (DuckDuckGo / Tavily JSON API)<br>
+                        • Spotify API & YouTube Audio Extraction (yt-dlp)<br><br>
+                        
+                        <div class="text-orange-600 font-bold mb-2 uppercase tracking-wider border-b border-black pb-1">■ SYSTEM LAYER</div>
+                        • Debian Linux, PulseAudio, Python 3.11+
+                    </div>
+                </div>
+
+                <!-- Pipeline -->
+                <div>
+                    <img src="https://github.com/user-attachments/assets/db4a74b1-9119-4647-abe4-44eaaebdeed1" alt="Software Banner 1" class="w-full rounded-none border-2 border-black mb-8 shadow-[4px_4px_0px_0px_#111]">
+                    
+                    <h3 class="text-xl font-black uppercase mb-6 flex items-center"><span class="bg-black text-[#e6e4e0] text-xs font-mono px-2 py-1 mr-3">04.2</span> Command Router Logic</h3>
+                    <div class="border-2 border-black rounded-none overflow-hidden shadow-[4px_4px_0px_0px_#111]">
+                        <div class="bg-black text-[#e6e4e0] px-4 py-2 font-mono text-xs flex justify-between">
+                            <span>router.py</span>
+                            <span>Python 3.11</span>
+                        </div>
+                        <pre class="border-0"><code>def route_command(transcribed_text):
+    text = transcribed_text.lower()
+    
+    if "search and think" in text:
+        # Mode: Research & Synthesis
+        return call_deepseek(query, context, mode="synthesis")
+        
+    elif "search" in text:
+        # Mode: Factual Retrieval
+        return call_deepseek(query, context, mode="summarize")
+        
+    elif "think" in text:
+        # Mode: Creative/Reasoning
+        return call_deepseek(query, mode="creative")
+        
+    else:
+        # Default: Conversational
+        return call_deepseek(text, mode="conversational")</code></pre>
+                    </div>
+                </div>
+            </div>
+            
+            <img src="https://github.com/user-attachments/assets/384f5fc0-6738-462b-bef4-029c18ea133e" alt="Software Details" class="w-full rounded-none border-2 border-black mt-12 shadow-[4px_4px_0px_0px_#111]">
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-24 px-6 max-w-7xl mx-auto">
+        <div class="text-center mb-16">
+            <span class="text-xs font-mono uppercase tracking-widest text-orange-600 font-bold">[ Capability Matrix ]</span>
+            <h2 class="text-4xl font-black uppercase mt-2">Core Capabilities</h2>
+            <p class="text-slate-600 font-mono text-xs uppercase mt-2">Tested offline operational modules inside standard packaging models.</p>
+        </div>
+        
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">🎙️</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-01 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Custom Wake Word</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">"Hey Pico" powered by Porcupine, fully customizable via the companion web app interface.</p>
+            </div>
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">🔐</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-02 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Owner Verification</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">Biometric voiceprint matching via Picovoice Eagle ensures Pico only listens to authorized users.</p>
+            </div>
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">⚡</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-03 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Smart Interrupt</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">Natural barge-in capability during TTS playback, powered by localized Silero VAD engines.</p>
+            </div>
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">🧠</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-04 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Triple Command Modes</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">Dynamically switch between Think, Search, and Think & Search based on processed query parameters.</p>
+            </div>
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">🏠</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-05 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Smart Home Hub</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">Local integration paths via standard MQTT protocols, Matter targets, and direct WiZ APIs.</p>
+            </div>
+            <div class="brutalist-panel p-6 bg-white shadow-[4px_4px_0px_0px_#111]">
+                <div class="flex justify-between items-center mb-4 border-b border-black pb-2">
+                    <span class="text-2xl">🛡️</span>
+                    <span class="font-mono text-xs text-slate-500">[ F-06 ]</span>
+                </div>
+                <h4 class="text-lg font-bold uppercase text-black mb-2">Privacy-First</h4>
+                <p class="text-slate-600 text-sm font-mono leading-snug">Zero cloud audio ingestion. All STT, TTS, and local wake processing execute completely offline.</p>
+            </div>
+        </div>
+
+        <!-- Factual Repository Addition: Sound & Acoustic Feedback Mapping Table -->
+        <div class="mt-12 brutalist-panel p-8 bg-[#f0ede9]">
+            <h3 class="text-2xl font-black uppercase mb-6 tracking-tight flex items-center gap-2">
+                <span>■</span> Sound &amp; Interaction Feedback States
+            </h3>
+            <table class="w-full text-xs md:text-sm text-left font-mono border-collapse border-2 border-black bg-white">
+                <thead>
+                    <tr class="bg-black text-[#e6e4e0] border-b-2 border-black">
+                        <th class="p-3 border-r-2 border-black">System State</th>
+                        <th class="p-3 border-r-2 border-black">Auditory Identity</th>
+                        <th class="p-3">Physical Status Indicator</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-black">
+                        <td class="p-3 border-r border-black font-bold">Wake</td>
+                        <td class="p-3 border-r border-black">🔔 Soft two-note chime</td>
+                        <td class="p-3">Hotword detected; microphone array is active</td>
+                    </tr>
+                    <tr class="border-b border-black">
+                        <td class="p-3 border-r border-black font-bold">Listening</td>
+                        <td class="p-3 border-r border-black">🌊 Gentle ambient pad</td>
+                        <td class="p-3">Audio capture window open for vocal inputs</td>
+                    </tr>
+                    <tr class="border-b border-black">
+                        <td class="p-3 border-r border-black font-bold">Thinking</td>
+                        <td class="p-3 border-r border-black">💭 Deep warm ambient tone</td>
+                        <td class="p-3">Pipeline processing data (STT / Web / LLM / TTS)</td>
+                    </tr>
+                    <tr>
+                        <td class="p-3 border-r border-black font-bold">Ready</td>
+                        <td class="p-3 border-r border-black">✨ Soft single-note chime</td>
+                        <td class="p-3">Output stream compiled and payload delivery starting</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-12 brutalist-panel p-8 bg-[#f0ede9]">
+            <h3 class="text-2xl font-black uppercase mb-6 tracking-tight flex items-center gap-2">
+                <span>■</span> Interaction Flow Example
+            </h3>
+            <div class="space-y-4 font-mono text-xs md:text-sm border-t border-black pt-6">
+                <p><span class="text-slate-500 font-bold">[ USER ]</span> "Hey Pico"</p>
+                <p><span class="text-orange-600 font-bold">[ PICO ]</span> <span class="bg-black text-[#e6e4e0] px-1 py-0.5 text-xs">VERIFIED</span> [LED turns solid orange] "Listening..."</p>
+                <p><span class="text-slate-500 font-bold">[ USER ]</span> "Think... write a poem about AI"</p>
+                <p><span class="text-orange-600 font-bold">[ PICO ]</span> [Local Vosk Pipeline STT ➔ Command Router flags keyword 'think']</p>
+                <p><span class="text-slate-500 font-bold">[ LOGS ]</span> Dispatching to local LLM context ➔ Emitting Piper TTS stream sequence</p>
+                <p><span class="text-slate-500 font-bold">[ USER ]</span> [Interrupts mid-sentence]</p>
+                <p><span class="text-orange-600 font-bold">[ PICO ]</span> [Silero VAD trigger ➔ Immediate sound output halt, resets process list to active listener]</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW LICENSE & COPYRIGHT DETAILS SECTION -->
+    <section class="py-16 px-6 max-w-7xl mx-auto border-t-2 border-black bg-white font-mono text-xs leading-relaxed">
+        <div class="grid md:grid-cols-12 gap-8">
+            <div class="md:col-span-6">
+                <h2 class="text-lg font-black uppercase mb-4 text-black tracking-tight flex items-center gap-2">
+                    <span>📄</span> License &amp; Copyright Notice
+                </h2>
+                <p class="font-bold text-black mb-2">© 2026 Panth Mavani, Gujarat, India. All Rights Reserved.</p>
+                <p class="text-slate-600 mb-4">
+                    PicoBox is a proprietary project. No part of this project may be copied, modified, distributed, or used without explicit permission.
+                </p>
+                <p class="font-bold text-black">For licensing inquiries:</p>
+                <a href="mailto:omgpanth6623@gmail.com" class="text-orange-600 underline hover:text-black">omgpanth6623@gmail.com</a>
+            </div>
+            <div class="md:col-span-6 border-l-0 md:border-l-2 border-black pl-0 md:pl-8 flex flex-col justify-between">
+                <div>
+                    <h3 class="text-sm font-bold uppercase mb-4 text-black">Quick Navigation Links</h3>
+                    <ul class="space-y-2 uppercase tracking-wider">
+                        <li><a href="https://github.com/panthomg/PicoBox" target="_blank" class="hover:text-orange-600 hover:underline">■ GitHub Repository</a></li>
+                        <li><a href="https://github.com/panthomg/PicoBox/blob/main/use_guide.md" target="_blank" class="hover:text-orange-600 hover:underline">■ Showcase Guide</a></li>
+                        <li><a href="https://robu.in/arduino-physical-ai-challenge-india-2026/" target="_blank" class="hover:text-orange-600 hover:underline">■ Competition Submission</a></li>
+                    </ul>
+                </div>
+                <div class="mt-8 pt-4 border-t border-black/10 text-slate-500">
+                    Made with ❤️ for those who ask. For those who question. 🎙️✨
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-[#e6e4e0] py-16 border-t-2 border-black font-mono">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-6 md:mb-0">
+                <div class="font-black text-2xl tracking-tighter text-white">PICO<span class="text-orange-600">®</span></div>
+                <p class="text-xs text-slate-500 mt-1 uppercase">Modular intelligence hardware stack</p>
+            </div>
+            <p class="text-xs text-slate-400 max-w-sm text-center md:text-left leading-relaxed">
+                Designed for Arduino UNO Q architectures. Pure open-source distribution. No telemetry registered.
+            </p>
+            <div class="mt-6 md:mt-0 flex space-x-6 text-xs uppercase">
+                <a href="#" class="hover:text-orange-600 transition">Docs</a>
+                <a href="https://github.com/panthomg/PicoBox" class="hover:text-orange-600 transition">Source</a>
+                <a href="#" class="hover:text-orange-600 transition">License</a>
+            </div>
+        </div>
+        <div class="checkerbar w-full mt-12"></div>
+    </footer>
+
+    <!-- Three.js Interactive 3D Script -->
+    <script>
+        // Setup Three.js Scene
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        
+        // Camera setup matching vector schematic look
+        const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 1000);
+        camera.position.set(4.5, 4.5, 5.5);
+
+        // Renderer
+        const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // Orbit Controls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = 1.2;
+        controls.enableZoom = false; // Disable zoom so it doesn't interrupt page scrolling
+
+        // Floor Grid (Industrial engineering layout)
+        const gridHelper = new THREE.GridHelper(10, 20, 0x111111, 0x888888);
+        gridHelper.position.y = -1.6;
+        gridHelper.material.opacity = 0.25;
+        gridHelper.material.transparent = true;
+        scene.add(gridHelper);
+
+        // Group container
+        const picoGroup = new THREE.Group();
+
+        // Matte brutalist charcoal material and vector border colors
+        const bodyMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x1a1a1a, // Near-black block
+            roughness: 0.85,
+            metalness: 0.1
+        });
+        const lineMaterial = new THREE.LineBasicMaterial({ 
+            color: 0x111111, 
+            linewidth: 2 
+        });
+
+        // Base Box
+        const bodyGeo = new THREE.BoxGeometry(2, 2, 2);
+        const bodyMesh = new THREE.Mesh(bodyGeo, bodyMaterial);
+        picoGroup.add(bodyMesh);
+
+        // Outer Wireframe Edges (Draw vectors on top of the solid geometry)
+        const edgesGeo = new THREE.EdgesGeometry(bodyGeo);
+        const edgesLine = new THREE.LineSegments(edgesGeo, lineMaterial);
+        picoGroup.add(edgesLine);
+
+        // Top Port Grill
+        const grillGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.08, 24);
+        const grillMesh = new THREE.Mesh(grillGeo, new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 }));
+        grillMesh.position.y = 1.01;
+        picoGroup.add(grillMesh);
+
+        const grillEdgesGeo = new THREE.EdgesGeometry(grillGeo);
+        const grillEdgesLine = new THREE.LineSegments(grillEdgesGeo, lineMaterial);
+        grillEdgesLine.position.y = 1.01;
+        picoGroup.add(grillEdgesLine);
+
+        // Signal Indicator Light (Industrial status orange)
+        const ledGeo = new THREE.TorusGeometry(0.85, 0.03, 8, 48);
+        const ledMaterial = new THREE.MeshBasicMaterial({ 
+            color: 0xf97316, 
+            transparent: true,
+            opacity: 0.9
+        });
+        const ledMesh = new THREE.Mesh(ledGeo, ledMaterial);
+        ledMesh.position.y = 1.04;
+        ledMesh.rotation.x = Math.PI / 2;
+        picoGroup.add(ledMesh);
+
+        scene.add(picoGroup);
+
+        // Basic high-contrast directional lighting (stark lighting matches brutalist look)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+        scene.add(ambientLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.7);
+        dirLight.position.set(5, 8, 5);
+        scene.add(dirLight);
+
+        const fillLight = new THREE.DirectionalLight(0xe6e4e0, 0.4);
+        fillLight.position.set(-5, 3, -5);
+        scene.add(fillLight);
+
+        // Animation Loop
+        let clock = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            clock += 0.02;
+
+            // Slow vertical mechanical hover
+            picoGroup.position.y = Math.sin(clock) * 0.08;
+
+            // Pulsate orange indicator LED status
+            ledMaterial.opacity = 0.45 + Math.sin(clock * 3) * 0.45;
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle resizing bounds
+        window.addEventListener('resize', () => {
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+    </script>
+
+    <!-- UI/UX Simulator & Mobile Navigation logic scripts -->
+    <script>
+        // Mobile menu drawer toggler
+        function toggleMobileMenu() {
+            const drawer = document.getElementById('mobile-drawer');
+            const menuIcon = document.getElementById('menu-icon-hamburger');
+            const closeIcon = document.getElementById('menu-icon-close');
+            
+            if (drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                drawer.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        }
+
+        // GUI Simulator state
+        let currentSimMode = 'think';
+        let currentSimModel = 'deepseek';
+        let remoteMicConnected = false;
+
+        // Animate metrics to look functional & active
+        setInterval(() => {
+            const tempVal = (47.5 + Math.random() * 3).toFixed(1);
+            const ramVal = (71.5 + Math.random() * 2).toFixed(1);
+            document.getElementById('metric-temp').innerText = tempVal + ' °C';
+            document.getElementById('metric-ram').innerText = ramVal + '%';
+        }, 3000);
+
+        function updateSimulatedModel() {
+            currentSimModel = document.getElementById('sim-model').value;
+            writeToTerminal(`// Active engine hot-swapped to: [${currentSimModel.toUpperCase()}]`);
+        }
+
+        function setSimMode(mode) {
+            currentSimMode = mode;
+            // Reset visual button states
+            document.getElementById('mode-think').className = "border-2 border-black bg-white text-black p-2 text-center uppercase font-bold transition";
+            document.getElementById('mode-search').className = "border-2 border-black bg-white text-black p-2 text-center uppercase font-bold transition";
+            document.getElementById('mode-both').className = "border-2 border-black bg-white text-black p-2 text-center uppercase font-bold transition";
+            
+            if (mode === 'think') {
+                document.getElementById('mode-think').className = "border-2 border-black bg-black text-white p-2 text-center uppercase font-bold transition";
+                writeToTerminal(`// Mode changed to: [THINK] (Local foundational parameters only)`);
+            } else if (mode === 'search') {
+                document.getElementById('mode-search').className = "border-2 border-black bg-black text-white p-2 text-center uppercase font-bold transition";
+                writeToTerminal(`// Mode changed to: [SEARCH] (Real-time crawler extraction mode)`);
+            } else {
+                document.getElementById('mode-both').className = "border-2 border-black bg-black text-white p-2 text-center uppercase font-bold transition";
+                writeToTerminal(`// Mode changed to: [THINK & SEARCH] (Comprehensive online mapping analysis)`);
+            }
+        }
+
+        function toggleRemoteMic() {
+            remoteMicConnected = !remoteMicConnected;
+            const btn = document.getElementById('remote-toggle');
+            const status = document.getElementById('remote-status');
+            if (remoteMicConnected) {
+                btn.innerText = "Toggle Off";
+                btn.className = "border-2 border-black bg-black text-white px-3 py-1 font-bold text-[10px] uppercase";
+                status.innerText = "CONNECTED (PHONE AUDIO ACTIVE)";
+                status.className = "text-emerald-500 font-bold";
+                writeToTerminal(`// Smartphone connected over local subnet. Configured as secondary mic array.`);
+            } else {
+                btn.innerText = "Toggle On";
+                btn.className = "border-2 border-black bg-white px-3 py-1 font-bold text-[10px] uppercase";
+                status.innerText = "DISCONNECTED";
+                status.className = "text-red-700 font-bold";
+                writeToTerminal(`// Smartphone mic stream terminated. Reverting to local XMOS board.`);
+            }
+        }
+
+        function writeToTerminal(text, colorClass = 'text-slate-400') {
+            const terminal = document.getElementById('sim-terminal-screen');
+            const timestamp = new Date().toLocaleTimeString();
+            terminal.innerHTML += `<p class="${colorClass}">[${timestamp}] ${text}</p>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        // Simulates complete vocal wake word transaction loop
+        function triggerSimulatedSequence() {
+            const statusDot = document.getElementById('sim-status-dot');
+            const statusText = document.getElementById('sim-status-text');
+            
+            // Step 1: Wake
+            statusDot.className = "w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping";
+            statusText.innerText = "Waking Up...";
+            writeToTerminal(`🔔 [CHIME] "Hey Pico" signal parsed. Wake verification sequence initialized...`, 'text-orange-400');
+
+            setTimeout(() => {
+                // Step 2: Verification & Listening
+                statusText.innerText = "Listening...";
+                writeToTerminal(`🌊 [AMBIENT PAD] Voice biometrics validated. Audio remote capture active. Ready for voice payload...`, 'text-sky-400');
+                
+                setTimeout(() => {
+                    // Step 3: Thinking
+                    statusText.innerText = "Thinking...";
+                    writeToTerminal(`💭 [WARM TONE] Dispatched vocal query processing over Vosk STT engine. Mapping tokens...`, 'text-purple-400');
+                    
+                    setTimeout(() => {
+                        // Compiled execution outputs matching provider choices
+                        let outputText = "";
+                        if (currentSimModel === 'deepseek') {
+                            if (currentSimMode === 'think') {
+                                outputText = "Synthesizing contextual prompt parameters. DeepSeek V4: 'The future of physical operations requires decentralized edge compute nodes like PicoBox.'";
+                            } else if (currentSimMode === 'search') {
+                                outputText = "Web Search result: 'Gujarat winter temperature is currently averaging 21°C, skies are clear.'";
+                            } else {
+                                outputText = "Synthesis: Deep study indicates remote workers save an average of 42 minutes daily in commuting. Productivity indices rose by 14% overall.";
+                            }
+                        } else if (currentSimModel === 'ollama') {
+                            outputText = "Local Llama 3.2 (100% AIR-GAPPED): 'Encrypted query processed locally. Zero network transmission packets registered.'";
+                        } else if (currentSimModel === 'openai') {
+                            outputText = "GPT-4o standard: 'Connecting home WiZ targets. Command successfully broadcasted over MQTT.'";
+                        } else {
+                            outputText = "Claude 3.5 Sonnet: 'Logic parsed. Refined educational model indicates scale tutoring efficiency can increase up to 2.4x under direct supervision.'";
+                        }
+
+                        // Step 4: Ready & synthesized speech output simulation
+                        statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+                        statusText.innerText = "Ready / Emitting Response";
+                        writeToTerminal(`✨ [SINGLE-CHIME] Compilation completed. Direct Piper TTS wave payload compiled successfully.`, 'text-emerald-400');
+                        writeToTerminal(`📢 OUTPUT SPEAKER SOUND: "${outputText}"`, 'text-white font-bold');
+                    }, 2000);
+
+                }, 1500);
+
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
