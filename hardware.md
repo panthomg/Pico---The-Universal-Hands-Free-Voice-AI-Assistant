@@ -9,6 +9,9 @@ Here is the cleaned and properly formatted markdown documentation for your proje
 
 ## Core Components
 
+![Uploading Untitled Document 2 (1) (1) (2).png…]()
+
+
 ### The Brain: Arduino UNO Q 4GB
 
 > **Overview:** The central processing unit handling the system's logic, AI processing, and OS environment.
