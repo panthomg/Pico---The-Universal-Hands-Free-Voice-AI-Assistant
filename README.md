@@ -19,6 +19,19 @@ Pico talks to you in your natural language. You don't type you speak what you wa
 
 Unlike conventional smart speakers, Pico offers an open, modular ecosystem. It gives users complete agency over their hardware and software: choose any AI model (from cloud APIs to local offline models), configure custom voice triggers, set hard token budgets, and manage the device through a responsive React companion web app.
 
+
+> #### Why Pico exist? Why is it the best in its field/Niche?
+>
+> - Pico is extremly customizable from LLM model selection, to your voice pick up, to Pico's custom voice and personality.
+> - Each family member can recieve a unique personality and memories realted to them with voice identification
+> - Pico works with LLM API KEYS, your own api keys stored locally encrypted. Select any model you like.
+> - Pico can search internet *(depends on LLM model)*, Pico has ability to think before answering *(depends on LLM model)*
+> - Unlike a phone, you don't have to touch or type anything just call "Hey Pico" and ask. This makes it way easier for younger children to seek for knowledge or senior citizens access such powerful LLMs without them having to deal with complex user interfaces on phone they can use their voice and recieve answer in voice significantly redcuing the time spent on getting you work done. Your phone is designed for the young and tech-savvy. Pico is designed for everyone.
+> - 🙌 Truly Hands-Free : When you're cooking, writing, or working—you can't use your phone. Pico is always available.
+> - Stationary, always in the room plugged, No notifications, Built for the space
+
+>
+>  *Everything* is going according to **plan**.
 ---
 
 ## 🚀 Key Features
