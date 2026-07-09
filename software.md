@@ -155,3 +155,14 @@ Pico: Immediate stream termination → Resets to listen for subsequent command
 | 💭 **Think** | *"Pico, think..."* | Pure LLM generation (creative layout & logic reasoning) | *"Write a poem about the ocean"* |
 | 🔍 **Search** | *"Pico, search..."* | Targeted web crawl followed by semantic LLM summarization | *"What's the latest news on AI?"* |
 | 🧠 **Think & Search** | *"Pico, search and think..."* | Broad web fetch followed by deep contextual synthesis | *"How will AI change education?"* |
+
+
+# PicoBox - Hands-Free Voice AI Assistant
+# Copyright (c) 2026 Panth Mavani. All Rights Reserved.
+# 
+# This software is proprietary and confidential. Unauthorized copying,
+# distribution, modification, or use of this software without explicit
+# written permission from the copyright holder is strictly prohibited.
+# 
+# For licensing inquiries, please contact: omgpanth6623@gmail.com
+
