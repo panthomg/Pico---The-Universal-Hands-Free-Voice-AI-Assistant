@@ -69,7 +69,7 @@ PicoBox is a proprietary project. No part of this software or its associated doc
 ---
 
 ## 🔗 Quick Links
-* [GitHub Repository](https://panthomg.github.io/PicoBox/)
+* [WEBPAGE](https://panthomg.github.io/PicoBox/)
 * [GitHub Repository](https://github.com/panthomg/PicoBox/)
 * [Showcase Guide](https://github.com/panthomg/PicoBox/blob/main/use_guide.md)
 * [Competition Submission](https://www.google.com/search?q=%23)
