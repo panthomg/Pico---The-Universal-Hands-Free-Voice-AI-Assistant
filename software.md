@@ -6,7 +6,7 @@
 
 
 
-> To enhance the software quality and time spent on development, AI would be used in developing the software end.
+> To enhance the software quality and time spent on development, AI would be used appropriately and responsibly in developing the software end.
 
 ---
 
