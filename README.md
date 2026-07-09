@@ -9,6 +9,7 @@ Introducing Pico, a smart LLM based assitant speaker built for your you, for you
 Freedom to ask anything. Pico is for students, for professionals, for the elderly, for anyone who asks. Knowledge should be accessible to everyone with Pico. 
 Pico talks to you in your natural language. You don't type you speak what you want to. Pico is there to understand you and help you regarding nearly infinite topics and things.
 
+<img width="6969" height="2346" alt="Untitled Document 2 (1) (1)" src="https://github.com/user-attachments/assets/3d78653f-1259-4090-848d-b92ee29de208" />
 
 # Just say "Hey Pico"
 **4-5 meter range, across the room**
