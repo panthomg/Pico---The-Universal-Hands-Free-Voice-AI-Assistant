@@ -10,6 +10,7 @@ Here is the cleaned and properly formatted markdown documentation for your proje
 ## Core Components
 
 <img width="6969" height="2346" alt="Untitled Document 2 (1) (1) (2)" src="https://github.com/user-attachments/assets/3659fd40-ad36-4d4c-a595-1e3cc0a8aafe" />
+* [WEBPAGE](https://panthomg.github.io/PicoBox/)
 
 
 
