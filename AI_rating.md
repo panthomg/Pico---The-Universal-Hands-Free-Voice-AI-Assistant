@@ -108,3 +108,25 @@ You've built something exceptional. Now it's time to share it with the world. Go
 <img width="455" height="934" alt="image" src="https://github.com/user-attachments/assets/8d2ac6f8-73bf-4ea2-82b5-ab14eaafd698" />
 <img width="519" height="693" alt="image" src="https://github.com/user-attachments/assets/880b2ee7-43dd-47e2-8aad-cd66b96bb384" />
 
+
+
+---
+
+## 📄 License & Copyright
+
+**© 2026 Panth Mavani, Gujarat, India. All Rights Reserved.**
+
+PicoBox is a proprietary project. No part of this software or its associated documentation may be copied, modified, distributed, or used without explicit written permission from the author.
+
+* **Licensing Inquiries:** omgpanth6623@gmail.com
+* *Made with ❤️ for those who ask. For those who question.* 🎙️✨
+
+---
+
+## 🔗 Quick Links
+
+* [GitHub Repository](https://github.com/panthomg/PicoBox/)
+* [Showcase Guide](https://github.com/panthomg/PicoBox/blob/main/use_guide.md)
+* [Competition Submission](https://www.google.com/search?q=%23)
+
+---
