@@ -12,6 +12,7 @@
 ## 🌟 What to Showcase
 
 **Pico** is a hands-free voice AI assistant designed for the home. Activating with the wake word **"Hey Pico"**, it dynamically answers questions, searches the web, generates creative content, and adapts to individual user ecosystems without the need for screens, buttons, or standalone apps.
+> Note: To enhance the time spent on writing proper showcase markdown with least error possible, AI was used appropriately and responsibly in developing this guide.
 
 ---
 
