@@ -84,7 +84,7 @@ At the heart of the hardware showcase are Pico's **three primary operational sta
 
 ## 🎧 The Sound & Interaction System
 
-Pico relies on a non-intrusive auditory experience, substituting standard loud alarms or system beeps with professional acoustic feedback tracking execution states.
+Pico will get a non-intrusive auditory experience, substituting standard loud alarms or system beeps with professional acoustic feedback tracking execution states.
 
 | State | Auditory Identity | System Status |
 | --- | --- | --- |
