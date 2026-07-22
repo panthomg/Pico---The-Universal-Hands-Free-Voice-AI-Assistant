@@ -37,7 +37,7 @@ Unlike conventional smart speakers, Pico offers an open, modular ecosystem. It g
 - 🙌 Truly Hands-Free : When you're cooking, writing, or working—you can't use your phone. Pico is always available.
 - Stationary, always in the room plugged, No notifications, Built for the space
 
-
+---
 
 # What problem is being solved by proposed project Pico?
 
@@ -49,6 +49,7 @@ Pico solves this by being a voice assistant built for the curious mind —
 a companion that helps you understand, explore, and learn. It gives you freedom: 
 choose any AI provider, customize everything, and never get locked in. No subscriptions. No barriers. 
 Just knowledge, accessible to everyone.
+
 ---
 
 # Are there any aspects that make your project unique from similar projects online?
@@ -119,6 +120,8 @@ Pico uses Silero VAD to detect when you've finished speaking, so it doesn't cut 
 15. Low Latency — Fast Responses
 Pico is optimized for speed: wake word detection under 50ms, STT under 200ms, and end-to-end responses in 2.5-4.5 seconds. It feels responsive and real-time.
 
+---
+
 ## 🚀 Key Features
 
 *   **Universal AI Integration:** Swap backend LLM engines seamlessly. Supports DeepSeek (V4-Flash & V4-Pro), OpenAI, Anthropic, Google Gemini, Groq, or local offline models using Ollama.
@@ -134,7 +137,6 @@ Pico is optimized for speed: wake word detection under 50ms, STT under 200ms, an
 ---
 
 
----
 
 ## 📄 License & Copyright
 
